@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoGuide | Vehicle Chatbot</title>
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --panel: rgba(18, 24, 32, 0.92);
+            --panel-soft: rgba(255, 255, 255, 0.045);
+            --text: #f5f7fa;
+            --muted: #9aa5b1;
+            --accent: #ff6b35;
+            --accent-2: #ff9b54;
+            --border: rgba(255, 255, 255, 0.09);
+            --user: #243241;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.16), transparent 28%),
+                radial-gradient(circle at 85% 80%, rgba(255, 155, 84, 0.10), transparent 25%),
+                var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app {
+            width: min(1050px, 100%);
+            height: min(760px, 94vh);
+            display: grid;
+            grid-template-columns: 285px 1fr;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            background: var(--panel);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(18px);
+        }
+
+        .sidebar {
+            padding: 28px 22px;
+            border-right: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), transparent);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #101010;
+            font-size: 23px;
+            box-shadow: 0 10px 28px rgba(255, 107, 53, 0.24);
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 19px;
+            letter-spacing: -0.4px;
+        }
+
+        .brand span {
+            display: block;
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .scope {
+            padding: 17px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel-soft);
+        }
+
+        .scope-title {
+            font-size: 12px;
+            color: var(--accent-2);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .scope p {
+            margin: 9px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .topics {
+            margin-top: 24px;
+        }
+
+        .topics h3 {
+            margin: 0 0 12px;
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .topic {
+            padding: 9px 11px;
+            margin: 6px 0;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.035);
+            color: #cbd2da;
+            font-size: 13px;
+        }
+
+        .chat {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 22px 27px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #45d483;
+            box-shadow: 0 0 12px rgba(69, 212, 131, 0.7);
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .header small {
+            color: var(--muted);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            scroll-behavior: smooth;
+        }
+
+        .welcome {
+            max-width: 620px;
+            margin: 50px auto 25px;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .welcome h2 {
+            margin: 0;
+            font-size: clamp(25px, 4vw, 36px);
+            letter-spacing: -1px;
+        }
+
+        .welcome p {
+            margin: 12px auto 0;
+            max-width: 540px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .suggestions {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 9px;
+        }
+
+        .suggestion {
+            border: 1px solid var(--border);
+            background: var(--panel-soft);
+            color: #dbe1e7;
+            border-radius: 999px;
+            padding: 9px 13px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s ease;
+        }
+
+        .suggestion:hover {
+            border-color: rgba(255, 107, 53, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .message {
+            display: flex;
+            margin: 15px 0;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .bubble {
+            max-width: min(720px, 82%);
+            padding: 13px 16px;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            line-height: 1.55;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        .assistant .bubble {
+            background: var(--panel-soft);
+            border-bottom-left-radius: 5px;
+        }
+
+        .user .bubble {
+            background: var(--user);
+            border-bottom-right-radius: 5px;
+        }
+
+        .composer {
+            padding: 17px 22px 21px;
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrap {
+            display: flex;
+            gap: 9px;
+            padding: 7px;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            background: rgba(0,0,0,0.16);
+        }
+
+        textarea {
+            flex: 1;
+            resize: none;
+            min-height: 43px;
+            max-height: 130px;
+            border: 0;
+            outline: 0;
+            padding: 11px 12px;
+            background: transparent;
+            color: var(--text);
+            font: inherit;
+        }
+
+        textarea::placeholder {
+            color: #6f7984;
+        }
+
+        button.send {
+            align-self: flex-end;
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 13px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #151515;
+            font-size: 18px;
+            transition: 0.2s ease;
+        }
+
+        button.send:hover {
+            transform: scale(1.04);
+        }
+
+        .note {
+            margin: 8px 4px 0;
+            color: #66717d;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 0;
+            }
+
+            .app {
+                height: 100vh;
+                border-radius: 0;
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .messages {
+                padding: 20px 16px;
+            }
+
+            .header {
+                padding: 18px;
+            }
+
+            .composer {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">🚗</div>
+                <div>
+                    <h1>AutoGuide</h1>
+                    <span>Vehicle AI Assistant</span>
+                </div>
+            </div>
+
+            <section class="scope">
+                <div class="scope-title">Vehicle only</div>
+                <p>
+                    Ask about cars, bikes, EVs, engines, maintenance,
+                    specifications, safety and other vehicle topics.
+                </p>
+            </section>
+
+            <section class="topics">
+                <h3>Explore</h3>
+                <div class="topic">🚘 Cars & SUVs</div>
+                <div class="topic">🏍️ Bikes & Scooters</div>
+                <div class="topic">⚡ Electric Vehicles</div>
+                <div class="topic">🔧 Maintenance</div>
+                <div class="topic">🛡️ Safety Features</div>
+                <div class="topic">⚙️ Engines & Technology</div>
+            </section>
+        </aside>
+
+        <section class="chat">
+            <header class="header">
+                <div class="header-title">
+                    <span class="status"></span>
+                    <div>
+                        <h2>AutoGuide</h2>
+                        <small>Ready to answer vehicle questions</small>
+                    </div>
+                </div>
+                <div>🏁</div>
+            </header>
+
+            <div class="messages" id="messages">
+                <div class="welcome" id="welcome">
+                    <div class="welcome-icon">🚘</div>
+                    <h2>Your vehicle, explained.</h2>
+                    <p>
+                        Ask me anything about cars, motorcycles, EVs,
+                        engines, maintenance, safety or vehicle technology.
+                    </p>
+
+                    <div class="suggestions">
+                        <button class="suggestion" onclick="useSuggestion('What is the difference between an EV and a hybrid?')">
+                            EV vs Hybrid
+                        </button>
+                        <button class="suggestion" onclick="useSuggestion('What are the important parts of a car engine?')">
+                            Engine basics
+                        </button>
+                        <button class="suggestion" onclick="useSuggestion('How often should car tyres be checked?')">
+                            Tyre maintenance
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form class="composer" id="chatForm">
+                <div class="input-wrap">
+                    <textarea id="messageInput" rows="1" placeholder="Ask a vehicle-related question..."></textarea>
+                    <button class="send" type="submit" aria-label="Send">➤</button>
+                </div>
+                <div class="note">AutoGuide answers vehicle-related questions only.</div>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById("chatForm");
+        const input = document.getElementById("messageInput");
+        const messages = document.getElementById("messages");
+        const welcome = document.getElementById("welcome");
+
+        function useSuggestion(text) {
+            input.value = text;
+            input.focus();
+        }
+
+        function addMessage(text, role) {
+            const message = document.createElement("div");
+            message.className = `message ${role}`;
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+            bubble.textContent = text;
+
+            message.appendChild(bubble);
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function addTyping() {
+            const message = document.createElement("div");
+            message.className = "message assistant";
+            message.id = "typing";
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+            bubble.textContent = "AutoGuide is thinking...";
+
+            message.appendChild(bubble);
+            messages.appendChild(message);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (welcome) welcome.remove();
+
+            addMessage(text, "user");
+            input.value = "";
+            input.style.height = "auto";
+            addTyping();
+
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                const typing = document.getElementById("typing");
+                if (typing) typing.remove();
+
+                addMessage(
+                    data.reply || "Sorry, I could not generate a response.",
+                    "assistant"
+                );
+            } catch (error) {
+                const typing = document.getElementById("typing");
+                if (typing) typing.remove();
+
+                addMessage(
+                    "Sorry, something went wrong. Please try again.",
+                    "assistant"
+                );
+            }
+        });
+
+        input.addEventListener("input", () => {
+            input.style.height = "auto";
+            input.style.height = `${Math.min(input.scrollHeight, 130)}px`;
+        });
+
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                form.requestSubmit();
+            }
+        });
+    </script>
+</body>
+</html>
